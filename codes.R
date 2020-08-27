@@ -374,20 +374,12 @@ plot(x=lamda, y=lik_fun, xlab = "lambda", ylab="L(lambda)", pch=20,main="fig:4.2
 
 lam= lamda[which(lik_fun==max(lik_fun))]
 abline(v= lam, col="red", lty="dotted", lwd=2)
-
-#3(c) 
+ 
 ytrain_aux= (Y_train^lam - rep(1,times=n))/lam
 qq.plot(X_train, ytrain_aux,'fig:4.3 Q-Q plot after Box Cox transformation')
 
 ## normality assumption seems to have improved as thus obtained plot is closer to ideal situation. 
 ## thus we keep the transformation
 Y_train= ytrain_aux
-#Calculating RMSE and coefficient estimates
-beta_hat_final=solve(t(X_train)%*%X_train)%*%t(X_train)%*% Y_train
-beta_hat_final
-RSS_final= sum((Y_test-X_test%*%beta_hat)^2)
-RMSE_new_final=sqrt(RSS_final/length(Y_test))
-RMSE_new_final
-RMSE
 
 #---------------------------------------------------------------------- THE END--------------------------------------------------------------------------------------------
