@@ -1,4 +1,3 @@
-
 rm(list=ls()) #Clearing the R-enviroment variables
 getwd()       #Present working directory 
 # Here we are working on Boston Housing Datasets 
@@ -49,6 +48,9 @@ Y_test_cap=X_test%*%beta_hat
 #RMSE Value of the testing the datasets
 RMSE=sqrt(sum((Y_test-Y_test_cap)^2))/sqrt(length(Y_test))
 RMSE
+model_accuracy=round((1-(RMSE/mean(Y_test)))*100,2)
+cat("model accuracy",model_accuracy,"%")
+model_accuracy
 ##(1)---Diagnosis of leverage and influential observations----
 #1(a).To find leverage point and drop those using suitable threshold
 n=nrow(X_train);p=ncol(X_train)
@@ -163,7 +165,7 @@ if(RMSE_new<RMSE){RMSE=RMSE_new}
 
 
 
-##(2)--------------------------------------------------Dealing-with-curvatures-----------------------------------------------------------------------------------------
+##(2)---Dealing-with-curvatures-------------------------------------
 #2(a)
 n=nrow(X_train) ; p=ncol(X_train)
 res=(Y_train-X_train%*%beta_hat2)
@@ -249,7 +251,7 @@ RMSE
 #from the result we get that RMSE_trans is less than RMSE . thus transformation has  improved linearity of the residual 
 
 
-##(3)------------------------------------Dealing with problem of Hetroscedasticity------------------------------------------------------------------------------------------
+##(3)---Dealing with problem of Hetroscedasticity------------
 #3(a)
 res=(Y_train-X_train%*%beta_hat)
 par(mfrow=c(2,(p-1)/2))
@@ -313,7 +315,7 @@ RMSE; RMSE_new
 if(RMSE_new<RMSE){RMSE=RMSE_new}
 
 
-##(4)----------------------------------------------Diagnosing the normality assumption------------------------------------------------------------------------------------
+##(4)---Diagnosing the normality assumption--------------------
 #4(a)
 #qq.plot() function can plot quantile quantile plot
 #input variable is predictor matrix and response vector 
@@ -352,6 +354,7 @@ qq.plot=function(Z,y,text)
 }
 par(mfrow=c(1,3))
 qq.plot(X_train,Y_train,"fig:4.1 Q-Q Plot ")
+shapiro.test(Y_train)
 #Looking at the qq plot we find that all the points are not in straight line 
 #So, Performing Box-Cox transformation. So, normality assumption of error is #verified 
 #4(b)Box-Cox Transformation
@@ -373,13 +376,23 @@ for( i in 1:length(lamda))
 plot(x=lamda, y=lik_fun, xlab = "lambda", ylab="L(lambda)", pch=20,main="fig:4.2 likelihood as funcn of lambda")
 
 lam= lamda[which(lik_fun==max(lik_fun))]
+lam
 abline(v= lam, col="red", lty="dotted", lwd=2)
- 
 ytrain_aux= (Y_train^lam - rep(1,times=n))/lam
+shapiro.test(ytrain_aux)
 qq.plot(X_train, ytrain_aux,'fig:4.3 Q-Q plot after Box Cox transformation')
 
 ## normality assumption seems to have improved as thus obtained plot is closer to ideal situation. 
 ## thus we keep the transformation
 Y_train= ytrain_aux
+model=lm(Y_train~X_train[,-1])
+coefficient=matrix(model$coefficients,nrow=length(model$coefficients),ncol=1)
+Y=X_test%*%coefficient
+Ynew=(0.6*Y+1)^(1/0.6)
+RMSE_final=sqrt(sum((Y_test-Ynew)^2)/length(Y_test))
+RMSE_final
+Prediction_accuracy=round((1-(RMSE_final/mean(Y_test)))*100,2)
+cat("model accuracy",Prediction_accuracy,"%")
+#------------------------ THE END--------------------------------
 
-#---------------------------------------------------------------------- THE END--------------------------------------------------------------------------------------------
+
